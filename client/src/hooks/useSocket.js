@@ -9,6 +9,9 @@ export const useSocket = () => {
   if (!socketRef.current) {
     socketRef.current = io(SOCKET_URL, {
       transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
     });
   }
 

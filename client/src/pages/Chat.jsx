@@ -29,6 +29,22 @@ const Chat = () => {
   }, [socket]);
 
   useEffect(() => {
+    socket.on('reconnect', () => {
+        console.log('Reconnected! Re-joining room...');
+        if (joinedRoom && room) {
+            socket.emit('join_room', room);
+        }
+    });
+
+    return () => {
+        socket.off('reconnect');
+    };
+  }, [socket, joinedRoom, room]);
+
+  
+
+  //Loads message history after log in 
+  useEffect(() => {
     socket.on('message_history', (history) => {
         setMessages(history);
     });
