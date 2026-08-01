@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../hooks/useSocket';
 import { useNavigate } from 'react-router-dom';
 
+
 const Chat = () => {
   const { user, logout } = useAuth();
   const socket = useSocket();
@@ -14,6 +15,7 @@ const Chat = () => {
   const [joinedRoom, setJoinedRoom] = useState(false);
   const [typingUser, setTypingUser] = useState('');
   const messagesEndRef = useRef(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,6 +38,11 @@ const Chat = () => {
     socket.on('message_history', (history) => {
       setMessages(history);
     });
+
+    socket.on('room_users', (users) => {
+       setOnlineUsers(users);
+    });
+
     socket.on('connect', () => {
   console.log('Socket connected to server:', socket.id);
 });
@@ -51,6 +58,7 @@ socket.on('connect_error', (err) => {
   socket.off('message_history');
   socket.off('connect');
   socket.off('connect_error');
+  socket.off('room_users');
 };
   }, [socket]);
 
@@ -70,12 +78,12 @@ socket.on('connect_error', (err) => {
   const joinRoom = () => {
     if (room.trim()) {
       if (socket.connected) {
-        socket.emit('join_room', room);
+        socket.emit('join_room', { roomId: room, username: user.username });
         setJoinedRoom(true);
       } else {
         socket.connect();
         socket.once('connect', () => {
-          socket.emit('join_room', room);
+          socket.emit('join_room', { roomId: room, username: user.username });
           setJoinedRoom(true);
         });
       }
@@ -131,6 +139,11 @@ socket.on('connect_error', (err) => {
           <div style={styles.roomInfo}>
             Room: <strong>#{room}</strong>
           </div>
+
+          {/* Online users */}
+       <div style={styles.onlineUsers}>
+           🟢 Online: {onlineUsers.join(', ')}
+       </div>
 
           <div style={styles.messages}>
             {messages.length === 0 && (
@@ -206,6 +219,13 @@ const styles = {
   messageInput: { flex: 1, padding: '0.75rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem' },
   sendBtn: { padding: '0.75rem 1.5rem', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer' },
   typingIndicator: { padding: '0.25rem 1rem', fontSize: '0.8rem', color: '#6b7280', fontStyle: 'italic' },
+  onlineUsers: { 
+  padding: '0.4rem 1rem', 
+  background: '#f0fdf4', 
+  fontSize: '0.8rem', 
+  color: '#166534',
+  borderBottom: '1px solid #e5e7eb'
+},
 };
 
 export default Chat;
