@@ -4,9 +4,7 @@ const roomUsers = {}; // tracks users per room - v2
 
 const socketHandler = (io) => {
   io.on('connection', (socket) => {
-    socket.on('message_seen', (data) => {
-  socket.to(data.roomId).emit('message_seen', { username: data.username });
-});
+  
     console.log(`User connected: ${socket.id}`);
 
     socket.on('join_room', async (data) => {
@@ -62,6 +60,10 @@ const socketHandler = (io) => {
 
     socket.on('stop_typing', (data) => {
       socket.to(data.roomId).emit('user_stop_typing', { username: data.username });
+    });
+
+      socket.on('message_seen', (data) => {
+      socket.to(data.roomId).emit('message_seen', { username: data.username });
     });
 
     socket.on('disconnect', () => {
