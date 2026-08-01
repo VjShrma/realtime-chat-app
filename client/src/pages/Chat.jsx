@@ -23,9 +23,6 @@ const Chat = () => {
   }, [messages]);
 
   useEffect(() => {
-    socket.on('message_seen', (data) => {
-  setSeenBy(data.username);
-});
 
     socket.on('receive_message', (data) => {
       setMessages((prev) => [...prev, data]);
@@ -43,6 +40,10 @@ const Chat = () => {
     socket.on('message_history', (history) => {
       setMessages(history);
     });
+
+     socket.on('message_seen', (data) => {
+  setSeenBy(data.username);
+});
 
     socket.on('room_users', (users) => {
        setOnlineUsers(users);
