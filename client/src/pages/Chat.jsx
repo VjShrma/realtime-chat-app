@@ -16,12 +16,17 @@ const Chat = () => {
   const [typingUser, setTypingUser] = useState('');
   const messagesEndRef = useRef(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [seenBy, setSeenBy] = useState('');
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => {
+    socket.on('message_seen', (data) => {
+  setSeenBy(data.username);
+});
+
     socket.on('receive_message', (data) => {
       setMessages((prev) => [...prev, data]);
     });
@@ -59,6 +64,7 @@ socket.on('connect_error', (err) => {
   socket.off('connect');
   socket.off('connect_error');
   socket.off('room_users');
+  socket.off('message_seen');
 };
   }, [socket]);
 
@@ -85,6 +91,7 @@ socket.on('connect_error', (err) => {
         socket.once('connect', () => {
           socket.emit('join_room', { roomId: room, username: user.username });
           setJoinedRoom(true);
+          socket.emit('message_seen', { roomId: room, username: user.username });
         });
       }
     }
@@ -169,6 +176,13 @@ socket.on('connect_error', (err) => {
             <div ref={messagesEndRef} />
           </div>
 
+             {/*Seen indicator*/}
+          {seenBy && messages.length > 0 && (
+           <div style={styles.seenIndicator}>
+                Seen by {seenBy}
+                  </div>
+                    )}
+
           {typingUser && (
             <div style={styles.typingIndicator}>
               {typingUser} is typing...
@@ -226,6 +240,14 @@ const styles = {
   color: '#166534',
   borderBottom: '1px solid #e5e7eb'
 },
+//seen Indiactors
+seenIndicator: {
+  padding: '0 1rem 0.25rem',
+  fontSize: '0.75rem',
+  color: '#9ca3af',
+  textAlign: 'right',
+},
+
 };
 
 export default Chat;
