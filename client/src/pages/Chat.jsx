@@ -62,18 +62,18 @@ socket.on('connect_error', (err) => {
 };
   }, [socket]);
 
-  useEffect(() => {
-    socket.on('reconnect', () => {
-      console.log('Reconnected! Re-joining room...');
-      if (joinedRoom && room) {
-        socket.emit('join_room', room);
-      }
-    });
+ useEffect(() => {
+  socket.on('reconnect', () => {
+    console.log('Reconnected! Re-joining room...');
+    if (joinedRoom && room) {
+      socket.emit('join_room', { roomId: room, username: user.username });
+    }
+  });
 
-    return () => {
-      socket.off('reconnect');
-    };
-  }, [socket, joinedRoom, room]);
+  return () => {
+    socket.off('reconnect');
+  };
+}, [socket, joinedRoom, room]);
 
   const joinRoom = () => {
     if (room.trim()) {
