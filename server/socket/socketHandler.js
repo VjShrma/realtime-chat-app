@@ -58,6 +58,11 @@ const socketHandler = (io) => {
 
     socket.on('disconnect', () => {
       console.log(`User disconnected: ${socket.id}`);
+
+      socket.on('user_typing', (data) => {
+  console.log('Received user_typing:', data);
+  setTypingUser(data.username);
+});
     });
   });
 };

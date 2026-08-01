@@ -120,7 +120,15 @@ const Chat = () => {
           <input
             style={styles.input}
             value={room}
-            onChange={(e) => setRoom(e.target.value)}
+            onChange={(e) => {
+  setInput(e.target.value);
+  if (e.target.value) {
+    console.log('Emitting typing event');
+    socket.emit('typing', { roomId: room, username: user.username });
+  } else {
+    socket.emit('stop_typing', { roomId: room, username: user.username });
+  }
+}}
             placeholder="Enter room name"
           />
           <button style={styles.joinBtn} onClick={joinRoom}>Join Room</button>
