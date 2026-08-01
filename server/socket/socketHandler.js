@@ -7,6 +7,7 @@ const socketHandler = (io) => {
     console.log(`User connected: ${socket.id}`);
 
     socket.on('join_room', async (data) => {
+        console.log('join_room received:', data);
       const { roomId, username } = data;
 
       socket.join(roomId);
@@ -69,6 +70,9 @@ const socketHandler = (io) => {
       console.log(`${socket.username} disconnected`);
     });
   });
+
+  
 };
+
 
 module.exports = socketHandler;
