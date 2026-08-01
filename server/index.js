@@ -20,14 +20,15 @@ app.get('/test', (req, res) => {
 // Attach Socket.io to the HTTP server
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173', // React dev server (Vite default)
+    origin: ['http://localhost:5173', 'https://realtime-chat-app-two-tau.vercel.app'],
     methods: ['GET', 'POST'],
   },
 });
-
 connectDB();
 
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://realtime-chat-app-two-tau.vercel.app'],
+}));
 app.use(express.json());
 
 app.get('/', (req, res) => {
