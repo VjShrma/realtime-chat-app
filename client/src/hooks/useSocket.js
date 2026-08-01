@@ -8,7 +8,7 @@ export const useSocket = () => {
 
   if (!socketRef.current) {
     socketRef.current = io(SOCKET_URL, {
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,

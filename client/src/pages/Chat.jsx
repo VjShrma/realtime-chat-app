@@ -36,13 +36,22 @@ const Chat = () => {
     socket.on('message_history', (history) => {
       setMessages(history);
     });
+    socket.on('connect', () => {
+  console.log('Socket connected to server:', socket.id);
+});
 
-    return () => {
-      socket.off('receive_message');
-      socket.off('user_typing');
-      socket.off('user_stop_typing');
-      socket.off('message_history');
-    };
+socket.on('connect_error', (err) => {
+  console.log('Connection error:', err.message);
+});
+
+   return () => {
+  socket.off('receive_message');
+  socket.off('user_typing');
+  socket.off('user_stop_typing');
+  socket.off('message_history');
+  socket.off('connect');
+  socket.off('connect_error');
+};
   }, [socket]);
 
   useEffect(() => {
