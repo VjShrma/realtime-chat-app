@@ -1,6 +1,6 @@
 const Message = require('../models/Message');
 
-const roomUsers = {}; // { roomId: [{ socketId, username }] }
+const roomUsers = {}; // tracks users per room - v2
 
 const socketHandler = (io) => {
   io.on('connection', (socket) => {
