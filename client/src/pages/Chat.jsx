@@ -120,14 +120,7 @@ const Chat = () => {
           <input
             style={styles.input}
             value={room}
-            onChange={(e) => {
-                setInput(e.target.value);
-                if (e.target.value) {
-                    socket.emit('typing', {roomId: room, username: user.username});
-                } else {
-                    socket.emit('stop_typing', { roomId: room, username: user.username });
-                }
-            }}
+            onChange={(e) => setRoom(e.target.value)}
             placeholder="Enter room name"
           />
           <button style={styles.joinBtn} onClick={joinRoom}>Join Room</button>
@@ -173,7 +166,14 @@ const Chat = () => {
             <input
               style={styles.messageInput}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                 setInput(e.target.value);
+                if (e.target.value) {
+                socket.emit('typing', { roomId: room, username: user.username });
+                } else {
+                socket.emit('stop_typing', { roomId: room, username: user.username });
+                      }
+                }}
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
             />
