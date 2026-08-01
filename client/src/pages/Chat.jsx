@@ -28,9 +28,10 @@ const Chat = () => {
         setTypingUser(data.username);
     });
 
-    socket.on('user_stop_typing', () => {
-        setTypingUser('');
-    });
+    socket.on('user_typing', (data) => {
+  console.log('Received user_typing:', data);
+  setTypingUser(data.username);
+});
 
     return () => {
       socket.off('receive_message');
