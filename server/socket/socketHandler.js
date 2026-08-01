@@ -45,6 +45,16 @@ const socketHandler = (io) => {
       } catch (err) {
         console.error('Error saving message:', err.message);
       }
+
+      //Typing indicators
+      socket.on('typing', (data) => {
+        socket.to(data.roomId).emit('user_typing', { username: data.username });
+      });
+
+      socket.on('stop_typing', (data) => {
+        socket.to(data.roomId).emit('user_stop_typing', { username: data.username});
+      });
+
     });
 
     socket.on('disconnect', () => {

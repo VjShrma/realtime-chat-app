@@ -13,6 +13,7 @@ const Chat = () => {
   const [room, setRoom] = useState('general');
   const [joinedRoom, setJoinedRoom] = useState(false);
   const messagesEndRef = useRef(null);
+  const [typingUser, setTypingUser] = useState('');
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -23,8 +24,18 @@ const Chat = () => {
       setMessages((prev) => [...prev, data]);
     });
 
+    socket.on('user_typing', (data) => {
+        setTypingUser(data.username);
+    });
+
+    socket.on('user_stop_typing', () => {
+        setTypingUser('');
+    });
+
     return () => {
       socket.off('receive_message');
+      socket.off('user_typing');
+      socket.off('user_stop_typing');
     };
   }, [socket]);
 
@@ -79,6 +90,7 @@ const Chat = () => {
         time: new Date().toLocaleTimeString(),
       };
       socket.emit('send_message', messageData);
+      socket.emit('stop_typing', { roomId: room, username: user.username });
       setInput('');
     }
   };
@@ -108,7 +120,14 @@ const Chat = () => {
           <input
             style={styles.input}
             value={room}
-            onChange={(e) => setRoom(e.target.value)}
+            onChange={(e) => {
+                setInput(e.target.value);
+                if (e.target.value) {
+                    socket.emit('typing', {roomId: room, username: user.username});
+                } else {
+                    socket.emit('stop_typing', { roomId: room, username: user.username });
+                }
+            }}
             placeholder="Enter room name"
           />
           <button style={styles.joinBtn} onClick={joinRoom}>Join Room</button>
@@ -142,6 +161,13 @@ const Chat = () => {
             ))}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Typing indicator */}
+               {typingUser && (
+              <div style={styles.typingIndicator}>
+            {typingUser} is typing...
+              </div>
+            )}
 
           <div style={styles.inputRow}>
             <input
@@ -179,6 +205,12 @@ const styles = {
   inputRow: { display: 'flex', padding: '1rem', gap: '0.5rem', background: 'white', borderTop: '1px solid #e5e7eb' },
   messageInput: { flex: 1, padding: '0.75rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem' },
   sendBtn: { padding: '0.75rem 1.5rem', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer' },
+  typingIndicator: { 
+  padding: '0.25rem 1rem', 
+  fontSize: '0.8rem', 
+  color: '#6b7280', 
+  fontStyle: 'italic' 
+},
 };
 
 export default Chat;
