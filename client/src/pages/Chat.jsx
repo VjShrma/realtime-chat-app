@@ -96,7 +96,7 @@ socket.on('connect_error', (err) => {
         roomId: room,
         message: input,
         sender: user.username,
-        time: new Date().toLocaleTimeString(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), //Will display in 12hr format
       };
       socket.emit('send_message', messageData);
       socket.emit('stop_typing', { roomId: room, username: user.username });
