@@ -86,6 +86,7 @@ socket.on('connect_error', (err) => {
     if (room.trim()) {
       if (socket.connected) {
         socket.emit('join_room', { roomId: room, username: user.username });
+        socket.emit('message_seen', { roomId: room, username: user.username });
         setJoinedRoom(true);
       } else {
         socket.connect();
