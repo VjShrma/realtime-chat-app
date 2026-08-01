@@ -12,8 +12,8 @@ const Chat = () => {
   const [input, setInput] = useState('');
   const [room, setRoom] = useState('general');
   const [joinedRoom, setJoinedRoom] = useState(false);
-  const messagesEndRef = useRef(null);
   const [typingUser, setTypingUser] = useState('');
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -25,50 +25,41 @@ const Chat = () => {
     });
 
     socket.on('user_typing', (data) => {
-        setTypingUser(data.username);
+      console.log('Received user_typing:', data);
+      setTypingUser(data.username);
     });
 
-    socket.on('user_typing', (data) => {
-  console.log('Received user_typing:', data);
-  setTypingUser(data.username);
-});
+    socket.on('user_stop_typing', () => {
+      setTypingUser('');
+    });
+
+    socket.on('message_history', (history) => {
+      setMessages(history);
+    });
 
     return () => {
       socket.off('receive_message');
       socket.off('user_typing');
       socket.off('user_stop_typing');
+      socket.off('message_history');
     };
   }, [socket]);
 
   useEffect(() => {
     socket.on('reconnect', () => {
-        console.log('Reconnected! Re-joining room...');
-        if (joinedRoom && room) {
-            socket.emit('join_room', room);
-        }
+      console.log('Reconnected! Re-joining room...');
+      if (joinedRoom && room) {
+        socket.emit('join_room', room);
+      }
     });
 
     return () => {
-        socket.off('reconnect');
+      socket.off('reconnect');
     };
   }, [socket, joinedRoom, room]);
 
-  
-
-  //Loads message history after log in 
-  useEffect(() => {
-    socket.on('message_history', (history) => {
-        setMessages(history);
-    });
-
-    return () => {
-        socket.off('message_history');
-    };
-  }, [socket]);
-
   const joinRoom = () => {
     if (room.trim()) {
-      console.log('Socket connected?', socket.connected);
       if (socket.connected) {
         socket.emit('join_room', room);
         setJoinedRoom(true);
@@ -121,15 +112,7 @@ const Chat = () => {
           <input
             style={styles.input}
             value={room}
-            onChange={(e) => {
-  setInput(e.target.value);
-  if (e.target.value) {
-    console.log('Emitting typing event');
-    socket.emit('typing', { roomId: room, username: user.username });
-  } else {
-    socket.emit('stop_typing', { roomId: room, username: user.username });
-  }
-}}
+            onChange={(e) => setRoom(e.target.value)}
             placeholder="Enter room name"
           />
           <button style={styles.joinBtn} onClick={joinRoom}>Join Room</button>
@@ -164,25 +147,24 @@ const Chat = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Typing indicator */}
-               {typingUser && (
-              <div style={styles.typingIndicator}>
-            {typingUser} is typing...
-              </div>
-            )}
+          {typingUser && (
+            <div style={styles.typingIndicator}>
+              {typingUser} is typing...
+            </div>
+          )}
 
           <div style={styles.inputRow}>
             <input
               style={styles.messageInput}
               value={input}
               onChange={(e) => {
-                 setInput(e.target.value);
+                setInput(e.target.value);
                 if (e.target.value) {
-                socket.emit('typing', { roomId: room, username: user.username });
+                  socket.emit('typing', { roomId: room, username: user.username });
                 } else {
-                socket.emit('stop_typing', { roomId: room, username: user.username });
-                      }
-                }}
+                  socket.emit('stop_typing', { roomId: room, username: user.username });
+                }
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
             />
@@ -214,12 +196,7 @@ const styles = {
   inputRow: { display: 'flex', padding: '1rem', gap: '0.5rem', background: 'white', borderTop: '1px solid #e5e7eb' },
   messageInput: { flex: 1, padding: '0.75rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem' },
   sendBtn: { padding: '0.75rem 1.5rem', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer' },
-  typingIndicator: { 
-  padding: '0.25rem 1rem', 
-  fontSize: '0.8rem', 
-  color: '#6b7280', 
-  fontStyle: 'italic' 
-},
+  typingIndicator: { padding: '0.25rem 1rem', fontSize: '0.8rem', color: '#6b7280', fontStyle: 'italic' },
 };
 
 export default Chat;
