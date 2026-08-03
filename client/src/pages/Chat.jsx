@@ -26,6 +26,9 @@ const Chat = () => {
 
     socket.on('receive_message', (data) => {
       setMessages((prev) => [...prev, data]);
+
+      //tell the sender you've seen the message
+      socket.emit('message_seen', {roomId: data.roomId, username:user.username });
     });
 
     socket.on('user_typing', (data) => {
